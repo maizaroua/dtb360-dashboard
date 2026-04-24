@@ -460,10 +460,11 @@ col_stat2.info(f"📞 {df_opportunites['phone'].notna().sum()} avec téléphone"
 col_stat3.info(f"📧 {df_opportunites['email'].notna().sum()} avec email")
 
 
+
 # ── FOOTER ────────────────────────────────────────────────────
 st.markdown("---")
 st.markdown(
     "**DIGITECHBRIDGE360** — Dashboard Data Quality | "
     f"Base : {len(df):,} sociétés suisses | "
-    "Développé par Ayed Marwa"
+    "Développé par Maiza Roua"
 )
