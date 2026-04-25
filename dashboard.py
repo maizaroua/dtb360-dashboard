@@ -13,7 +13,7 @@ st.set_page_config(
 # ── CHARGEMENT DONNÉES ─────────────────────────────────────
 @st.cache_data
 def charger_données():
-    return pd.read_excel("base_modelisee.xlsx")
+    return pd.read_excel("base_finale.xlsx")
 
 df = charger_données()
 
