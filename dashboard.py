@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# ── CHARGEMENT DONNÉES ────────────────────────────────────────
+# ── CHARGEMENT DONNÉES ─────────────────────────────────────
 @st.cache_data
 def charger_données():
     return pd.read_excel("base_modelisee.xlsx")
@@ -291,6 +291,51 @@ fig_contact = px.histogram(
     labels={"contactability_score": "Score", "count": "Nombre"}
 )
 col_q3.plotly_chart(fig_contact, use_container_width=True)
+# ── Bloc ZEFIX ──────────────────────────────────────────────
+if "zefix_status" in df_filtre.columns:
+    st.subheader("🏛️ Vérification ZEFIX — Registre Officiel Suisse")
+
+    col_z1, col_z2, col_z3, col_z4 = st.columns(4)
+    actives    = (df_filtre["zefix_status"] == "Active").sum()
+    radiees    = (df_filtre["zefix_status"] == "Radiée").sum()
+    verifiees  = df_filtre["zefix_status"].notna().sum()
+    haut_conf  = (df_filtre["zefix_confidence"] == "High").sum()
+
+    col_z1.metric("✅ Sociétés Actives",    f"{actives:,}")
+    col_z2.metric("❌ Sociétés Radiées",    f"{radiees:,}")
+    col_z3.metric("🔍 Vérifiées ZEFIX",    f"{verifiees:,}")
+    col_z4.metric("⭐ Haute Confiance",     f"{haut_conf:,}")
+
+    # Graphique statuts ZEFIX
+    zefix_counts = df_filtre["zefix_status"].value_counts()
+    fig_zefix = px.pie(
+        values=zefix_counts.values,
+        names=zefix_counts.index,
+        title="🏛️ Statuts Officiels ZEFIX",
+        color_discrete_map={
+            "Active":       "#2ECC71",
+            "Radiée":       "#E74C3C",
+            "En liquidation":"#F39C12",
+            "Non trouvé":   "#95A5A6",
+            "Inconnu":      "#BDC3C7"
+        },
+        hole=0.4
+    )
+    st.plotly_chart(fig_zefix, use_container_width=True)
+
+    # Tableau sociétés vérifiées P1
+    st.subheader("🎯 Sociétés P1 Vérifiées ZEFIX")
+    df_zefix_p1 = df_filtre[
+        (df_filtre["zefix_status"] == "Active") &
+        (df_filtre["prospection_priority"] == "P1")
+    ][[
+        "Company name", "canton", "priority_domain_dtb360",
+        "uid_ide", "zefix_status", "zefix_confidence",
+        "phone", "email", "zefix_source_url"
+    ]].sort_values("Company name")
+
+    st.dataframe(df_zefix_p1, use_container_width=True, height=400)
+    st.success(f"✅ {len(df_zefix_p1)} sociétés P1 officiellement actives selon ZEFIX !")
 
 # ══════════════════════════════════════════════════════════════
 # VUE 5 — PILOTAGE COMMERCIAL DTB360
